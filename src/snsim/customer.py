@@ -20,10 +20,9 @@
 # IN THE SOFTWARE.
 
 class Customer:
-    '''
-        Defines a customer that is referenced by job instances
-        as they are created. Holds several customer-related
-        properties, such as gold status etc.
+    '''Defines a customer that is referenced by job instances
+    as they are created. Holds several customer-related
+    properties, such as gold status etc.
     '''
     
     def __init__(self, identifier, isGold, goldWeight):

@@ -29,14 +29,13 @@ import snsim.resourcepool
 import snsim.service
 
 class Scenario:
-    '''
-        Defines a whole scenario for the service network simulation.
-        Given a set of resource pools, service templates, job templates
-        and customers, a scenario is able to generate a set of job
-        instances. If a policy is set, the scenario is used to run
-        and control the complete simulation.
-        Scenarios can be reset in order to re-run a simulation based
-        on the same set of job instances with another policy set.
+    '''Defines a whole scenario for the service network simulation.
+    Given a set of resource pools, service templates, job templates
+    and customers, a scenario is able to generate a set of job
+    instances. If a policy is set, the scenario is used to run
+    and control the complete simulation.
+    Scenarios can be reset in order to re-run a simulation based
+    on the same set of job instances with another policy set.
     '''
     
     def __init__(self, parameters, resourcePools, serviceTemplates, jobTemplates, customers):

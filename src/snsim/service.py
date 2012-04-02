@@ -22,14 +22,13 @@
 import snsim.resourcepool
 
 class ServiceTemplate:
-    '''
-        Defines basic settings for a certain type of service. Based
-        on this description, service instances can be spawned, that keep
-        track of their status during simulation.
-        Besides basic properties, a service template requires a certain
-        resource pool to be assigned in order to allocate and deallocate
-        required resources if a service instance based on the service
-        template is spawned.
+    '''Defines basic settings for a certain type of service. Based
+    on this description, service instances can be spawned, that keep
+    track of their status during simulation.
+    Besides basic properties, a service template requires a certain
+    resource pool to be assigned in order to allocate and deallocate
+    required resources if a service instance based on the service
+    template is spawned.
     '''
     
     def __init__(self, identifier, resources, resourcePool, ticks, revenue, penalty, maxAttempts):
@@ -66,12 +65,11 @@ class ServiceTemplate:
 
 
 class ServiceInstance:
-    '''
-        Defines the instantiation of a service template and adds
-        runtime information.
-        Service instances are the smallest (atomic)
-        part of a simulation. Their dependencies are defined in
-        job templates.
+    '''Defines the instantiation of a service template and adds
+    runtime information.
+    Service instances are the smallest (atomic)
+    part of a simulation. Their dependencies are defined in
+    job templates.
     '''
     
     def __init__(self, template, job):
@@ -122,8 +120,7 @@ class ServiceInstance:
         self.ticksLeft = 0
 
 class MaxAttemptsReachedException(Exception):
-    '''
-        Raised when a service is requested to start but has already
-        reached its maximum number of start attempts.
+    '''Raised when a service is requested to start but has already
+    reached its maximum number of start attempts.
     '''
     pass

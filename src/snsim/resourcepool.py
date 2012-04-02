@@ -20,13 +20,12 @@
 # IN THE SOFTWARE.
 
 class ResourcePool:
-    '''
-        Defines a resource pool for a certain scenario.
-        Services reference a certain resource pool each
-        and will try to allocate resources when started and
-        deallocate them when finished. A resource pool keeps
-        track of available resources, current allocations and
-        their respective requesters.
+    '''Defines a resource pool for a certain scenario.
+    Services reference a certain resource pool each
+    and will try to allocate resources when started and
+    deallocate them when finished. A resource pool keeps
+    track of available resources, current allocations and
+    their respective requesters.
     '''
     
     def __init__(self, identifier, resources):
@@ -82,15 +81,13 @@ class ResourcePool:
             self.requesters.remove(req)
 
 class ResourceCapacityExceededException(Exception):
-    '''
-        Raised when a resource allocation request can not be
-        satisfied.
+    '''Raised when a resource allocation request can not be
+    satisfied.
     '''
     pass
 
 class ResourceCapacityUnderrunException(Exception):
-    '''
-        Raised when a service template tries to free more resources
-        than available or than it has allocated.
+    '''Raised when a service template tries to free more resources
+    than available or than it has allocated.
     '''
     pass

@@ -20,11 +20,10 @@
 # IN THE SOFTWARE.
 
 class FCFSPolicy:
-    '''
-        Defines a first-come first-serve style policy.
-        It will not prioritize services but rather return them
-        in their naturally random order respective to the 
-        job instances set.
+    '''Defines a first-come first-serve style policy.
+    It will not prioritize services but rather return them
+    in their naturally random order respective to the 
+    job instances set.
     '''
     
     def __init__(self, parameters):
@@ -44,10 +43,9 @@ class FCFSPolicy:
 
 
 class RatioBasedPolicy:
-    '''
-        Defines a policy that aims to always accept as many
-        services as possible. E.g. the accept to postpone ratio
-        is maximized in each step.
+    '''Defines a policy that aims to always accept as many
+    services as possible. E.g. the accept to postpone ratio
+    is maximized in each step.
     '''
     
     def __init__(self, parameters):
@@ -74,11 +72,10 @@ class RatioBasedPolicy:
 
 
 class RevenueBasedPolicy:
-    '''
-        Defines a policy that prioritizes available services by
-        their expected outcome (revenue) in each simulation step. 
-        It includes service-specific revenue as well as 
-        job-specific revenue.
+    '''Defines a policy that prioritizes available services by
+    their expected outcome (revenue) in each simulation step. 
+    It includes service-specific revenue as well as 
+    job-specific revenue.
     '''
     
     def __init__(self, parameters):
@@ -101,10 +98,9 @@ class RevenueBasedPolicy:
     
 
 class PenaltyBasedPolicy:
-    '''
-        Defines a policy that provides a prioritized selection of
-        services by their expected outcome (revenue) and expected
-        penalty dues.
+    '''Defines a policy that provides a prioritized selection of
+    services by their expected outcome (revenue) and expected
+    penalty dues.
     '''
 
     def __init__(self, parameters):
@@ -127,11 +123,10 @@ class PenaltyBasedPolicy:
 
 
 class ClassifiedPenaltyBasedPolicy:
-    '''
-        Defines a policy that provides a prioritized selection of
-        services by their expected outcome (revenue) and expected
-        penalty dues. Furthermore, customers are weighted by their
-        respective status (gold-customer vs. non-gold customer).
+    '''Defines a policy that provides a prioritized selection of
+    services by their expected outcome (revenue) and expected
+    penalty dues. Furthermore, customers are weighted by their
+    respective status (gold-customer vs. non-gold customer).
     '''
 
     def __init__(self, parameters):

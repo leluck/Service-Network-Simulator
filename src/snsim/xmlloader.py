@@ -28,9 +28,8 @@ import snsim.customer
 import snsim.scenario
 
 class XMLScenarioLoader:
-    '''
-        Defines a loader that parses scenarios described in XML
-        format. Refer to example XML files for the exact format.
+    '''Defines a loader that parses scenarios described in XML
+    format. Refer to example XML files for the exact format.
     '''
     
     def __init__(self, filename):

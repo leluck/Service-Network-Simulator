@@ -23,10 +23,9 @@ import snsim.service
 import snsim.resourcepool
 
 class JobTemplate:
-    '''
-        Defines a possible constellation of services and holds 
-        revenue and penalty due on completion of an instanced job
-        based on this template.
+    '''Defines a possible constellation of services and holds 
+    revenue and penalty due on completion of an instanced job
+    based on this template.
     '''
     
     def __init__(self, identifier, scenario, signature, revenue, penalty):
@@ -53,40 +52,36 @@ class JobTemplate:
         return self.identifier
     
 class InvalidSignatureFormatException(Exception):
-    '''
-        Raised when a given job signature description has and
-        invalid syntax. E.g. missing brackets or quotes.
-        A valid signature format is a string that defines
-        tuples of service identifiers in python style.
+    '''Raised when a given job signature description has and
+    invalid syntax. E.g. missing brackets or quotes.
+    A valid signature format is a string that defines
+    tuples of service identifiers in python style.
     '''
     pass
 
 class TooManyNestedScopesException(Exception):
-    '''
-        Raised when the parsed signature description is too
-        deeply nested. Signatures are tuples in a tuple, that
-        means they may have at most one layer of dependencies.
+    '''Raised when the parsed signature description is too
+    deeply nested. Signatures are tuples in a tuple, that
+    means they may have at most one layer of dependencies.
     '''
     pass
 
 class InvalidServiceReferenceException(Exception):
-    '''
-        Raised when the parsed signature description references
-        to service identifiers that are not known to the scenario
-        that holds the job template.
+    '''Raised when the parsed signature description references
+    to service identifiers that are not known to the scenario
+    that holds the job template.
     '''
     pass
 
 
 class JobInstance:
-    '''
-        Defines the instantiation of a job template and adds
-        certain additional properties. Furthermore, tracks the
-        progress within the signature defined by the job template
-        this instance is based on.
-        If running a simulation, job instances deliver services
-        that may be spawned respective to the signature constraints
-        and based on the current progress within the signature.
+    '''Defines the instantiation of a job template and adds
+    certain additional properties. Furthermore, tracks the
+    progress within the signature defined by the job template
+    this instance is based on.
+    If running a simulation, job instances deliver services
+    that may be spawned respective to the signature constraints
+    and based on the current progress within the signature.
     '''
     
     def __init__(self, identifier, template, customer):
@@ -175,8 +170,7 @@ class JobInstance:
             service.abort()
 
 class ServiceNotPendingException(Exception):
-    '''
-        Raised when a service shall be started that is not part of the
-        pending service set.
+    '''Raised when a service shall be started that is not part of the
+    pending service set.
     '''
     pass
