@@ -3,7 +3,7 @@
     <Parameters>
         <Seed>abcd</Seed>
         <GoldWeight>10</GoldWeight>
-        <JobCount>15</JobCount>
+        <JobCount>25</JobCount>
     </Parameters>
     <ResourcePools>
         <ResourcePool>
