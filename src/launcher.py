@@ -49,5 +49,9 @@ def launch():
     scenario.start()
     scenario.plot()
     
+    scenario.setPolicy(snsim.policy.FailedAttemptsBasedPolicy)
+    scenario.start()
+    scenario.plot()
+    
 if __name__ == '__main__':
     launch()

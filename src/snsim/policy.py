@@ -150,3 +150,32 @@ class ClassifiedPenaltyBasedPolicy:
         for service in sorted(pending, key = lambda service: service[0], reverse = True):
             prioritized.append(service[1])
         return prioritized
+
+
+class FailedAttemptsBasedPolicy:
+    '''Defines a policy that provides a prioritized selection of
+    services by their expected outcome (revenue) and expected
+    penalty dues. Furthermore, it weights services by their amount
+    of already failed attempts. This policy tries to avoid any
+    cancellation.
+    '''
+
+    def __init__(self, parameters):
+        self.name = 'Failed-Attempts-Based Policy'
+        self.parameters = parameters
+    
+    def __str__(self):
+        return str(self.name)
+    
+    def getPrioritizedServices(self, jobInstances):
+        pending = []
+        prioritized = []
+        for job in jobInstances:
+            for service in job.getPendingServices():
+                priorityKey = 1.0 # Possibly set penalty-based key here as a basis for weight by failed attempts
+                if service.template.maxAttempts - service.attempts > 0:
+                    priorityKey *= 1.0 / float(service.template.maxAttempts - service.attempts)
+                pending.append((priorityKey, service))
+        for service in sorted(pending, key = lambda service: service[0], reverse = True):
+            prioritized.append(service[1])
+        return prioritized
