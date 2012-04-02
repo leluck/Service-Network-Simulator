@@ -1,0 +1,9 @@
+# Compiled source
+*.pyc
+
+# Resulting images
+figures/
+
+# Aptana/Eclipse project files
+.project
+.pydevproject
