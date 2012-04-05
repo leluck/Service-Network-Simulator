@@ -86,8 +86,6 @@ class XMLScenarioLoader:
                 resources,
                 self.resourcePools[resourcePoolIdentifier],
                 int(service.getElementsByTagName('Ticks')[0].firstChild.data),
-                float(service.getElementsByTagName('Revenue')[0].firstChild.data),
-                float(service.getElementsByTagName('Penalty')[0].firstChild.data),
                 float(service.getElementsByTagName('MaxAttempts')[0].firstChild.data))
         
         jobList = root.getElementsByTagName('JobTemplates')[0]

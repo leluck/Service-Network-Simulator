@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 # Copyright (c) 2012 Johannes Bendler
 # Licensed under the MIT License (MIT)
 #
@@ -21,19 +19,36 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
 # IN THE SOFTWARE.
 
-import snsim.xmlloader
-import snsim.policy
-import snsim.generator
+import random
+import math
+import snsim.job
 
-def launch():    
-    loader = snsim.xmlloader.XMLScenarioLoader('../scenarios/scenario_02.xml')
+class SineJobGenerator:
+    '''Defines a class that generates new jobs dependent on
+    the current iteration step.
+    '''
     
-    scenario = loader.getScenario()
+    def __init__(self, jobTemplates, customers, randomizer = None):
+        self.jobTemplates = jobTemplates
+        self.customers = customers
+        self.nextJobId = 0
+        
+        if randomizer is None:
+            self.random = random
+        else:
+            self.random = randomizer
     
-    scenario.setPolicy(snsim.policy.PenaltyBasedPolicy)
-    scenario.setGenerator(snsim.generator.SineJobGenerator)
-    scenario.start(maxIterations = 100)
-    scenario.report()
+    def _getAmountByIteration(self, iteration):
+        if iteration % 4 == 0:
+            return int(math.floor(math.sin(iteration) + 2.0) * 200.0)
+        return 0
     
-if __name__ == '__main__':
-    launch()
+    def getJobInstances(self, iteration):
+        instances = set()
+        for id in range(0, self._getAmountByIteration(iteration)):
+            randomJobTemplate = self.jobTemplates[self.random.choice([k for k in self.jobTemplates.keys()])]
+            randomCustomer = self.customers[self.random.choice([k for k in self.customers.keys()])]
+            instances.add(snsim.job.JobInstance(self.nextJobId, randomJobTemplate, randomCustomer))
+            self.nextJobId += 1
+        
+        return instances

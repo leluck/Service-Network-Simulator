@@ -9,17 +9,9 @@
         <ResourcePool>
             <Identifier>ResourcePool01</Identifier>
             <Resources>
-                <CPU>48</CPU>
-                <Memory>32000</Memory>
+                <CPU>256</CPU>
+                <Memory>256000</Memory>
                 <Bandwidth>300</Bandwidth>
-            </Resources>
-        </ResourcePool>
-        <ResourcePool>
-            <Identifier>ResourcePool02</Identifier>
-            <Resources>
-                <CPU>8</CPU>
-                <Memory>8200</Memory>
-                <Bandwidth>200</Bandwidth>
             </Resources>
         </ResourcePool>
     </ResourcePools>
@@ -30,10 +22,6 @@
         </Customer>
         <Customer>
             <Identifier>Customer02</Identifier>
-            <isGold>False</isGold>
-        </Customer>
-        <Customer>
-            <Identifier>Customer03</Identifier>
             <isGold>True</isGold>
         </Customer>
     </Customers>
@@ -44,7 +32,7 @@
             <Ticks>8</Ticks>
             <Resources>
                 <CPU>1</CPU>
-                <Memory>512</Memory>
+                <Memory>64</Memory>
                 <Bandwidth>0</Bandwidth>
             </Resources>
             <MaxAttempts>100</MaxAttempts>
@@ -55,7 +43,7 @@
             <Ticks>4</Ticks>
             <Resources>
                 <CPU>1</CPU>
-                <Memory>1024</Memory>
+                <Memory>128</Memory>
                 <Bandwidth>0</Bandwidth>
             </Resources>
             <MaxAttempts>100</MaxAttempts>
@@ -63,10 +51,10 @@
         <Service>
             <Identifier>C</Identifier>
             <ResourcePool>ResourcePool01</ResourcePool>
-            <Ticks>32</Ticks>
+            <Ticks>16</Ticks>
             <Resources>
-                <CPU>4</CPU>
-                <Memory>4096</Memory>
+                <CPU>2</CPU>
+                <Memory>512</Memory>
                 <Bandwidth>6</Bandwidth>
             </Resources>
             <MaxAttempts>100</MaxAttempts>
@@ -74,10 +62,10 @@
         <Service>
             <Identifier>D</Identifier>
             <ResourcePool>ResourcePool01</ResourcePool>
-            <Ticks>16</Ticks>
+            <Ticks>12</Ticks>
             <Resources>
                 <CPU>2</CPU>
-                <Memory>2048</Memory>
+                <Memory>128</Memory>
                 <Bandwidth>12</Bandwidth>
             </Resources>
             <MaxAttempts>100</MaxAttempts>
@@ -86,7 +74,7 @@
     <JobTemplates>
         <JobTemplate>
             <Identifier>Pattern01</Identifier>
-            <Signature>(('A', 'B'), ('C'), ('B', 'D'))</Signature>
+            <Signature>(('A'), ('C'), ('B', 'D'))</Signature>
             <Revenue>50</Revenue>
             <Penalty>80</Penalty>
         </JobTemplate>
@@ -98,19 +86,19 @@
         </JobTemplate>
         <JobTemplate>
             <Identifier>Pattern03</Identifier>
-            <Signature>(('B', 'C', 'A'), ('B'), ('A', 'B', 'B'))</Signature>
+            <Signature>(('B', 'C'), ('B'), ('A'))</Signature>
             <Revenue>70</Revenue>
             <Penalty>150</Penalty>
         </JobTemplate>
         <JobTemplate>
             <Identifier>Pattern04</Identifier>
-            <Signature>(('D', 'B', 'A'), ('A', 'D'))</Signature>
-            <Revenue>30</Revenue>
-            <Penalty>60</Penalty>
+            <Signature>(('D', 'A'), ('C'), ('B'), ('A'))</Signature>
+            <Revenue>80</Revenue>
+            <Penalty>90</Penalty>
         </JobTemplate>
         <JobTemplate>
             <Identifier>Pattern05</Identifier>
-            <Signature>(('D', 'C', 'A'), ('A', 'B'))</Signature>
+            <Signature>(('D', 'C'), ('A', 'B'))</Signature>
             <Revenue>35</Revenue>
             <Penalty>40</Penalty>
         </JobTemplate>

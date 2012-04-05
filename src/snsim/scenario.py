@@ -49,12 +49,8 @@ class Scenario:
         if 'Seed' in self.parameters:
             self.random = random.Random(self.parameters['Seed'])
         
-        if 'JobCount' in self.parameters:
-            self.generateJobs(int(self.parameters['JobCount']))
-        else:
-            self.jobInstances = set()
-        
         self.policy = None
+        self.generator = None
         self.reset()
     
     def __str__(self):
@@ -64,10 +60,13 @@ class Scenario:
         return 'Scenario (%dRP, %dST, %dJT, %dC || %dJI, %s)' \
             % (len(self.resourcePools), len(self.serviceTemplates), len(self.jobTemplates), len(self.customers), jobCount, self.policy)
     
-    def setPolicy(self, policy):
+    def setPolicy(self, policy = None):
         self.policy = policy
     
-    def generateJobs(self, count):
+    def setGenerator(self, generator = None):
+        self.generator = generator
+    
+    def generateInitialJobs(self, count):
         self.jobInstances = set()
         for id in range(0, count):
             randomJobTemplate = self.jobTemplates[self.random.choice([k for k in self.jobTemplates.keys()])]
@@ -76,26 +75,40 @@ class Scenario:
     
     def reset(self):
         self.numIterations = 0
-        self.jobInstancesMutable = self.jobInstances.copy()
+        self.loadData = list()
         self.plotData = dict()
         self.plotAborts = dict()
+        
+        if self.generator is None:
+            self.generateInitialJobs(int(self.parameters['JobCount']))
+        else:
+            self.jobInstances = set()
+        
         if self.jobInstances != None:
             for job in self.jobInstances:
                 job.reset()
+        
+        self.jobsAborted = set()
     
-    def start(self):
+    def start(self, maxIterations = None):
         self.reset()
         
-        if self.policy == None or self.jobInstances == None or len(self.jobInstances) == 0:
-            print('! No policy defined or no job instances generated. Not starting simulation.')
+        if self.policy == None:
+            print('! No policy defined. Not starting simulation.')
             return
-        #Instantiate policy class that was set via setPolicy()
+        #Instantiate policy and generator
         self.policy = self.policy(self.parameters)
+        self.generator = self.generator(self.jobTemplates, self.customers, randomizer = self.random)
         
         print('Starting simulation (%s)' % (self.policy))
+        if maxIterations is None:
+            maxIterations = 200
         iteration = 0
-        while len(self.jobInstancesMutable) > 0 and iteration < 1000:
-            for service in self.policy.getPrioritizedServices(self.jobInstancesMutable):
+        if self.generator is not None:
+            self.jobInstances = self.jobInstances.union(self.jobInstances, self.generator.getJobInstances(iteration))
+        
+        while iteration < maxIterations:
+            for service in self.policy.getPrioritizedServices(self.jobInstances):
                 jobIndex = '%03d' % (service.job.identifier)
                 serviceIndex = '(%s,%s)' % (service.job.currentTuple, service.template.identifier)
                 if jobIndex not in self.plotData:
@@ -110,27 +123,56 @@ class Scenario:
                     pass
                 except snsim.service.MaxAttemptsReachedException:
                     service.job.abort()
+                    self.jobsAborted.add(service.job)
                     self.plotAborts[jobIndex] = iteration
         
             clear = set()
-            for job in self.jobInstancesMutable:
+            for job in self.jobInstances:
                 job.step()
                 if job.isFinished:
                     clear.add(job)
             for job in clear:
-                self.jobInstancesMutable.remove(job)
+                self.jobInstances.remove(job)
+            
+            # Collect system load information
+            self.loadData.append(dict())
+            self.loadData[iteration]['activeJobs'] = len(self.jobInstances)
+            self.loadData[iteration]['abortedJobs'] = len(self.jobsAborted)
+            self.loadData[iteration]['resources'] = dict()
+            for resPool in self.resourcePools:
+                self.loadData[iteration]['resources'][resPool] = dict()
+                for resource in self.resourcePools[resPool].resources:
+                    self.loadData[iteration]['resources'][resPool][resource] = \
+                        float(self.resourcePools[resPool].levels[resource]) / float(self.resourcePools[resPool].resources[resource])
             
             iteration += 1
+            if self.generator is not None:
+                self.jobInstances = self.jobInstances.union(self.jobInstances, self.generator.getJobInstances(iteration))
             
         # End of main while loop
         self.numIterations = iteration
         print('Simulation finished after %d iterations.' % (self.numIterations))
     
-    def report(self):
-        pass
+    def report(self, filename = None):
+        if filename is None:
+            filename = '../reports/default.csv'
+        
+        with open(filename, 'w') as reportFile:
+            reportFile.write('iteration;active;aborted;cpu;memory;bandwidth\n')
+            it = 0
+            for iteration in self.loadData:
+                reportFile.write('%d;%d;%d;%1.4f;%1.4f;%1.4f\n' 
+                      % (it,
+                         iteration['activeJobs'],
+                         iteration['abortedJobs'], 
+                         iteration['resources']['ResourcePool01']['CPU'], 
+                         iteration['resources']['ResourcePool01']['Memory'], 
+                         iteration['resources']['ResourcePool01']['Bandwidth']
+                         ))
+                it += 1
     
     def plot(self):
-        fig = plt.figure(figsize = (20, 15))
+        fig = plt.figure(figsize = (int(self.generator.nextJobId / 5.0), int(self.numIterations / 5.0)))
         fig.subplots_adjust(top = 0.98, bottom = 0.05, left = 0.05, right = 0.98)
         plot = fig.add_subplot(1, 1, 1)
         

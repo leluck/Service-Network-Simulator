@@ -3,6 +3,10 @@
 
 # Resulting images
 figures/
+*.png
+
+# Resulting output
+*.csv
 
 # Aptana/Eclipse project files
 .project

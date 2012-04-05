@@ -31,15 +31,13 @@ class ServiceTemplate:
     template is spawned.
     '''
     
-    def __init__(self, identifier, resources, resourcePool, ticks, revenue, penalty, maxAttempts):
+    def __init__(self, identifier, resources, resourcePool, ticks, maxAttempts):
         self.identifier = identifier
         
         self.resources = resources
         self.resourcePool = resourcePool
         
         self.ticks = ticks
-        self.revenue = revenue
-        self.penalty = penalty
         self.maxAttempts = maxAttempts
     
     def __str__(self):

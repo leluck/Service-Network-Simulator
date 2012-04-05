@@ -90,7 +90,7 @@ class RevenueBasedPolicy:
         prioritized = []
         for job in jobInstances:
             for service in job.getPendingServices():
-                priorityKey = service.template.revenue + job.getProgress() * job.template.revenue
+                priorityKey = job.template.revenue + job.getProgress() * job.template.revenue
                 pending.append((priorityKey, service))
         for service in sorted(pending, key = lambda service: service[0]):
             prioritized.append(service[1])
@@ -115,7 +115,7 @@ class PenaltyBasedPolicy:
         prioritized = []
         for job in jobInstances:
             for service in job.getPendingServices():
-                priorityKey = service.template.revenue + job.getProgress() * job.template.revenue + service.template.penalty + job.getProgress() * job.template.penalty
+                priorityKey = job.template.revenue + job.template.penalty + job.getProgress() * job.template.revenue + job.getProgress() * job.template.penalty
                 pending.append((priorityKey, service))
         for service in sorted(pending, key = lambda service: service[0], reverse = True):
             prioritized.append(service[1])
@@ -144,7 +144,7 @@ class ClassifiedPenaltyBasedPolicy:
                 customerGoldStatus = 0
                 if job.customer.isGold == True:
                     customerGoldStatus = 1
-                priorityKey = service.template.revenue + job.getProgress() * job.template.revenue + service.template.penalty + job.getProgress() * job.template.penalty
+                priorityKey = job.template.revenue + job.template.penalty + job.getProgress() * job.template.revenue + job.getProgress() * job.template.penalty
                 priorityKey *= float(self.parameters['GoldWeight']) ** customerGoldStatus
                 pending.append((priorityKey, service))
         for service in sorted(pending, key = lambda service: service[0], reverse = True):
