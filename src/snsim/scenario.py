@@ -20,6 +20,7 @@
 # IN THE SOFTWARE.
 
 import random
+import time
 
 import matplotlib.pyplot as plt
 import matplotlib.patches as plp
@@ -87,8 +88,6 @@ class Scenario:
         if self.jobInstances != None:
             for job in self.jobInstances:
                 job.reset()
-        
-        self.jobsAborted = set()
     
     def start(self, maxIterations = None):
         self.reset()
@@ -104,11 +103,18 @@ class Scenario:
         if maxIterations is None:
             maxIterations = 200
         iteration = 0
-        if self.generator is not None:
-            self.jobInstances = self.jobInstances.union(self.jobInstances, self.generator.getJobInstances(iteration))
+        abortedJobs = 0
+        absoluteStartTime = time.time()
         
         while iteration < maxIterations:
-            for service in self.policy.getPrioritizedServices(self.jobInstances):
+            print('Step %03d' % (iteration))
+            starttime = time.time()
+            if self.generator is not None:
+                self.jobInstances = self.jobInstances.union(self.jobInstances, self.generator.getJobInstances(iteration))
+            
+            prioritizedServiceList = self.policy.getPrioritizedServices(self.jobInstances)
+            numServices = len(prioritizedServiceList)
+            for service in prioritizedServiceList:
                 jobIndex = '%03d' % (service.job.identifier)
                 serviceIndex = '(%s,%s)' % (service.job.currentTuple, service.template.identifier)
                 if jobIndex not in self.plotData:
@@ -123,9 +129,13 @@ class Scenario:
                     pass
                 except snsim.service.MaxAttemptsReachedException:
                     service.job.abort()
-                    self.jobsAborted.add(service.job)
+                    abortedJobs += 1
                     self.plotAborts[jobIndex] = iteration
-        
+                except snsim.job.ServiceNotPendingException:
+                    service.job.abort()
+                    abortedJobs += 1
+                    self.plotAborts[jobIndex] = iteration
+            
             clear = set()
             for job in self.jobInstances:
                 job.step()
@@ -134,10 +144,13 @@ class Scenario:
             for job in clear:
                 self.jobInstances.remove(job)
             
+            elapsed = time.time() - starttime
+            print('%.4f sec for %5d active services' % (elapsed, numServices))
+            
             # Collect system load information
             self.loadData.append(dict())
             self.loadData[iteration]['activeJobs'] = len(self.jobInstances)
-            self.loadData[iteration]['abortedJobs'] = len(self.jobsAborted)
+            self.loadData[iteration]['abortedJobs'] = abortedJobs
             self.loadData[iteration]['resources'] = dict()
             for resPool in self.resourcePools:
                 self.loadData[iteration]['resources'][resPool] = dict()
@@ -146,22 +159,20 @@ class Scenario:
                         float(self.resourcePools[resPool].levels[resource]) / float(self.resourcePools[resPool].resources[resource])
             
             iteration += 1
-            if self.generator is not None:
-                self.jobInstances = self.jobInstances.union(self.jobInstances, self.generator.getJobInstances(iteration))
             
         # End of main while loop
         self.numIterations = iteration
-        print('Simulation finished after %d iterations.' % (self.numIterations))
+        print('Simulation finished after %d iterations taking %.2f seconds.' % (self.numIterations, time.time() - absoluteStartTime))
     
     def report(self, filename = None):
         if filename is None:
-            filename = '../reports/default.csv'
+            filename = '../reports/%s.out' % (self.policy)
         
         with open(filename, 'w') as reportFile:
-            reportFile.write('iteration;active;aborted;cpu;memory;bandwidth\n')
+            reportFile.write('#iteration active aborted cpu memory bandwidth\n')
             it = 0
             for iteration in self.loadData:
-                reportFile.write('%d;%d;%d;%1.4f;%1.4f;%1.4f\n' 
+                reportFile.write('%d %d %d %1.4f %1.4f %1.4f\n' 
                       % (it,
                          iteration['activeJobs'],
                          iteration['abortedJobs'], 

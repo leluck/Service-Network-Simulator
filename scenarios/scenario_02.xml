@@ -9,7 +9,7 @@
         <ResourcePool>
             <Identifier>ResourcePool01</Identifier>
             <Resources>
-                <CPU>256</CPU>
+                <CPU>128</CPU>
                 <Memory>256000</Memory>
                 <Bandwidth>300</Bandwidth>
             </Resources>
@@ -35,7 +35,7 @@
                 <Memory>64</Memory>
                 <Bandwidth>0</Bandwidth>
             </Resources>
-            <MaxAttempts>100</MaxAttempts>
+            <MaxAttempts>20</MaxAttempts>
         </Service>
         <Service>
             <Identifier>B</Identifier>
@@ -46,7 +46,7 @@
                 <Memory>128</Memory>
                 <Bandwidth>0</Bandwidth>
             </Resources>
-            <MaxAttempts>100</MaxAttempts>
+            <MaxAttempts>20</MaxAttempts>
         </Service>
         <Service>
             <Identifier>C</Identifier>
@@ -57,7 +57,7 @@
                 <Memory>512</Memory>
                 <Bandwidth>6</Bandwidth>
             </Resources>
-            <MaxAttempts>100</MaxAttempts>
+            <MaxAttempts>20</MaxAttempts>
         </Service>
         <Service>
             <Identifier>D</Identifier>
@@ -68,7 +68,7 @@
                 <Memory>128</Memory>
                 <Bandwidth>12</Bandwidth>
             </Resources>
-            <MaxAttempts>100</MaxAttempts>
+            <MaxAttempts>20</MaxAttempts>
         </Service>
     </Services>
     <JobTemplates>

@@ -39,9 +39,7 @@ class SineJobGenerator:
             self.random = randomizer
     
     def _getAmountByIteration(self, iteration):
-        if iteration % 4 == 0:
-            return int(math.floor(math.sin(iteration) + 2.0) * 200.0)
-        return 0
+        return int(math.floor(math.sin(iteration * 0.2) + 2.0) * 100.0)
     
     def getJobInstances(self, iteration):
         instances = set()

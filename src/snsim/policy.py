@@ -108,7 +108,7 @@ class PenaltyBasedPolicy:
         self.parameters = parameters
     
     def __str__(self):
-        return str(self.name)
+        return str(self.name.replace(' ', '_'))
     
     def getPrioritizedServices(self, jobInstances):
         pending = []

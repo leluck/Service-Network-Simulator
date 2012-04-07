@@ -148,7 +148,17 @@ class JobInstance:
             for serviceIdentifier in self.template.signature[self.currentTuple]:
                 self.pendingServices.add(snsim.service.ServiceInstance(self.template.scenario.serviceTemplates[serviceIdentifier], self))
         except IndexError:
-            self.isFinished = True
+            self._finish()
+
+    def _finish(self):
+        self.isFinished = True
+        
+        for service in self.runningServices:
+            service.abort()
+        
+        self.runningServices.clear()
+        self.pendingServices.clear()
+        self.finishedServices.clear()
 
     def getProgress(self):
         if self.isFinished == True:
@@ -163,11 +173,8 @@ class JobInstance:
         return (float(finishedServiceCount) / float(self.serviceCount))
 
     def abort(self):
-        self.isFinished = True
         self.wasAborted = True
-        
-        for service in self.runningServices:
-            service.abort()
+        self._finish()
 
 class ServiceNotPendingException(Exception):
     '''Raised when a service shall be started that is not part of the
