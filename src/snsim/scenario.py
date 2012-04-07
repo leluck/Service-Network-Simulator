@@ -104,16 +104,17 @@ class Scenario:
             maxIterations = 200
         iteration = 0
         abortedJobs = 0
-        absoluteStartTime = time.time()
+        absoluteStartTime = time.clock()
         
         while iteration < maxIterations:
             print('Step %03d' % (iteration))
-            starttime = time.time()
+            starttime = time.clock()
             if self.generator is not None:
                 self.jobInstances = self.jobInstances.union(self.jobInstances, self.generator.getJobInstances(iteration))
             
             prioritizedServiceList = self.policy.getPrioritizedServices(self.jobInstances)
             numServices = len(prioritizedServiceList)
+            numJobs = len(self.jobInstances)
             for service in prioritizedServiceList:
                 jobIndex = '%03d' % (service.job.identifier)
                 serviceIndex = '(%s,%s)' % (service.job.currentTuple, service.template.identifier)
@@ -129,27 +130,28 @@ class Scenario:
                     pass
                 except snsim.service.MaxAttemptsReachedException:
                     service.job.abort()
-                    abortedJobs += 1
                     self.plotAborts[jobIndex] = iteration
                 except snsim.job.ServiceNotPendingException:
                     service.job.abort()
-                    abortedJobs += 1
                     self.plotAborts[jobIndex] = iteration
             
             clear = set()
             for job in self.jobInstances:
                 job.step()
+                if job.wasAborted:
+                    abortedJobs += 1
                 if job.isFinished:
                     clear.add(job)
             for job in clear:
                 self.jobInstances.remove(job)
             
-            elapsed = time.time() - starttime
+            elapsed = time.clock() - starttime
             print('%.4f sec for %5d active services' % (elapsed, numServices))
             
             # Collect system load information
             self.loadData.append(dict())
-            self.loadData[iteration]['activeJobs'] = len(self.jobInstances)
+            self.loadData[iteration]['activeJobs'] = numJobs
+            self.loadData[iteration]['activeServices'] = numServices
             self.loadData[iteration]['abortedJobs'] = abortedJobs
             self.loadData[iteration]['resources'] = dict()
             for resPool in self.resourcePools:
@@ -162,7 +164,7 @@ class Scenario:
             
         # End of main while loop
         self.numIterations = iteration
-        print('Simulation finished after %d iterations taking %.2f seconds.' % (self.numIterations, time.time() - absoluteStartTime))
+        print('Simulation finished after %d iterations taking %.2f seconds.' % (self.numIterations, time.clock() - absoluteStartTime))
     
     def report(self, filename = None):
         if filename is None:
@@ -172,9 +174,11 @@ class Scenario:
             reportFile.write('#iteration active aborted cpu memory bandwidth\n')
             it = 0
             for iteration in self.loadData:
-                reportFile.write('%d %d %d %1.4f %1.4f %1.4f\n' 
+                reportFile.write('%d %d %d %d %d %1.4f %1.4f %1.4f\n' 
                       % (it,
+                         self.generator._getAmountByIteration(it),
                          iteration['activeJobs'],
+                         iteration['activeServices'],
                          iteration['abortedJobs'], 
                          iteration['resources']['ResourcePool01']['CPU'], 
                          iteration['resources']['ResourcePool01']['Memory'], 

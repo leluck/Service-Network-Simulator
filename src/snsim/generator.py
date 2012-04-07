@@ -39,11 +39,11 @@ class SineJobGenerator:
             self.random = randomizer
     
     def _getAmountByIteration(self, iteration):
-        return int(math.floor(math.sin(iteration * 0.2) + 2.0) * 100.0)
+        return int((math.sin(iteration * 0.05) + 1.0) * 5.0)
     
     def getJobInstances(self, iteration):
         instances = set()
-        for id in range(0, self._getAmountByIteration(iteration)):
+        for id in xrange(0, self._getAmountByIteration(iteration)):
             randomJobTemplate = self.jobTemplates[self.random.choice([k for k in self.jobTemplates.keys()])]
             randomCustomer = self.customers[self.random.choice([k for k in self.customers.keys()])]
             instances.add(snsim.job.JobInstance(self.nextJobId, randomJobTemplate, randomCustomer))

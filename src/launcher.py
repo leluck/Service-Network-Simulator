@@ -21,22 +21,22 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
 # IN THE SOFTWARE.
 
-import gc
+#import profile
 
 import snsim.xmlloader
 import snsim.policy
 import snsim.generator
 
 def launch():
-    #gc.set_debug(gc.DEBUG_STATS)
     loader = snsim.xmlloader.XMLScenarioLoader('../scenarios/scenario_02.xml')
     
     scenario = loader.getScenario()
     
     scenario.setPolicy(snsim.policy.PenaltyBasedPolicy)
     scenario.setGenerator(snsim.generator.SineJobGenerator)
-    scenario.start(maxIterations = 50)
+    scenario.start(maxIterations = 400)
     scenario.report()
     
 if __name__ == '__main__':
     launch()
+    #profile.run('launch()')

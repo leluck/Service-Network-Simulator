@@ -31,7 +31,6 @@ class ResourcePool:
     def __init__(self, identifier, resources):
         self.identifier = identifier
         self.resources = resources
-        self.requesters = []
         self.levels = dict()
         for res in self.resources:
             self.levels[res] = 0
@@ -61,7 +60,6 @@ class ResourcePool:
         if self.levels[identifier] + amount > self.resources[identifier]:
             raise ResourceCapacityExceededException(identifier)
         self.levels[identifier] += amount
-        self.requesters.append((requester, identifier, amount))
         return True
     
     def deallocate(self, requester, identifier, amount):
@@ -72,13 +70,7 @@ class ResourcePool:
             self.levels[identifier] = 0
         else:
             self.levels[identifier] -= amount
-        
-        clear = set()
-        for req in self.requesters:
-            if req == (requester, identifier, amount):
-                clear.add(req)
-        for req in clear:
-            self.requesters.remove(req)
+
 
 class ResourceCapacityExceededException(Exception):
     '''Raised when a resource allocation request can not be
