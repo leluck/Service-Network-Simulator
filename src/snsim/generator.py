@@ -23,7 +23,7 @@ import random
 import math
 import snsim.job
 
-class SineJobGenerator:
+class JobGenerator:
     '''Defines a class that generates new jobs dependent on
     the current iteration step.
     '''
@@ -31,17 +31,21 @@ class SineJobGenerator:
     def __init__(self, jobTemplates, customers, randomizer = None):
         self.jobTemplates = jobTemplates
         self.customers = customers
-        self.nextJobId = 0
         
         if randomizer is None:
             self.random = random
         else:
             self.random = randomizer
+        
+        self.reset()
     
     def _getAmountByIteration(self, iteration):
-        return int((math.sin(iteration * 0.05) + 1.0) * 5.0)
+        return int((math.sin(iteration * 0.05) + 1.0) * 2.5)
     
-    def getJobInstances(self, iteration):
+    def reset(self):
+        self.nextJobId = 0
+    
+    def getNewJobInstances(self, iteration):
         instances = set()
         for id in xrange(0, self._getAmountByIteration(iteration)):
             randomJobTemplate = self.jobTemplates[self.random.choice([k for k in self.jobTemplates.keys()])]

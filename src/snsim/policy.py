@@ -31,7 +31,7 @@ class FCFSPolicy:
         self.parameters = parameters
     
     def __str__(self):
-        return str(self.name)
+        return str(self.name.replace(' ', '_'))
     
     def getPrioritizedServices(self, jobInstances):
         services = []
@@ -53,7 +53,7 @@ class RatioBasedPolicy:
         self.parameters = parameters
     
     def __str__(self):
-        return str(self.name)
+        return str(self.name.replace(' ', '_'))
     
     def getPrioritizedServices(self, jobInstances):
         pending = []
@@ -83,7 +83,7 @@ class RevenueBasedPolicy:
         self.parameters = parameters
     
     def __str__(self):
-        return str(self.name)
+        return str(self.name.replace(' ', '_'))
     
     def getPrioritizedServices(self, jobInstances):
         pending = []
@@ -134,7 +134,7 @@ class ClassifiedPenaltyBasedPolicy:
         self.parameters = parameters
     
     def __str__(self):
-        return str(self.name)
+        return str(self.name.replace(' ', '_'))
     
     def getPrioritizedServices(self, jobInstances):
         pending = []
@@ -165,7 +165,7 @@ class FailedAttemptsBasedPolicy:
         self.parameters = parameters
     
     def __str__(self):
-        return str(self.name)
+        return str(self.name.replace(' ', '_'))
     
     def getPrioritizedServices(self, jobInstances):
         pending = []

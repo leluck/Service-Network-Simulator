@@ -31,10 +31,22 @@ def launch():
     loader = snsim.xmlloader.XMLScenarioLoader('../scenarios/scenario_02.xml')
     
     scenario = loader.getScenario()
+    scenario.setGenerator(snsim.generator.JobGenerator)
+    
+    scenario.setPolicy(snsim.policy.FCFSPolicy)
+    scenario.start(maxIterations = 600)
+    scenario.report()
+    
+    scenario.setPolicy(snsim.policy.RatioBasedPolicy)
+    scenario.start(maxIterations = 600)
+    scenario.report()
     
     scenario.setPolicy(snsim.policy.PenaltyBasedPolicy)
-    scenario.setGenerator(snsim.generator.SineJobGenerator)
-    scenario.start(maxIterations = 400)
+    scenario.start(maxIterations = 600)
+    scenario.report()
+    
+    scenario.setPolicy(snsim.policy.FailedAttemptsBasedPolicy)
+    scenario.start(maxIterations = 600)
     scenario.report()
     
 if __name__ == '__main__':

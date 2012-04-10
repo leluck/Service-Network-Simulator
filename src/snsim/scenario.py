@@ -22,6 +22,7 @@
 import random
 import time
 
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.patches as plp
 
@@ -46,10 +47,6 @@ class Scenario:
         self.jobTemplates = jobTemplates
         self.customers = customers
         
-        self.random = random
-        if 'Seed' in self.parameters:
-            self.random = random.Random(self.parameters['Seed'])
-        
         self.policy = None
         self.generator = None
         self.reset()
@@ -61,11 +58,11 @@ class Scenario:
         return 'Scenario (%dRP, %dST, %dJT, %dC || %dJI, %s)' \
             % (len(self.resourcePools), len(self.serviceTemplates), len(self.jobTemplates), len(self.customers), jobCount, self.policy)
     
-    def setPolicy(self, policy = None):
-        self.policy = policy
+    def setPolicy(self, policy):
+        self.policy = policy(self.parameters)
     
-    def setGenerator(self, generator = None):
-        self.generator = generator
+    def setGenerator(self, generator):
+        self.generator = generator(self.jobTemplates, self.customers, randomizer = self.random)
     
     def generateInitialJobs(self, count):
         self.jobInstances = set()
@@ -76,18 +73,24 @@ class Scenario:
     
     def reset(self):
         self.numIterations = 0
+        self.sumRevenue = 0.0
+        self.sumPenalty = 0.0
         self.loadData = list()
         self.plotData = dict()
         self.plotAborts = dict()
         
+        self.random = random
+        if 'Seed' in self.parameters:
+            self.random = random.Random(self.parameters['Seed'])
+        
+        self.jobInstances = set()
         if self.generator is None:
             self.generateInitialJobs(int(self.parameters['JobCount']))
         else:
-            self.jobInstances = set()
-        
-        if self.jobInstances != None:
-            for job in self.jobInstances:
-                job.reset()
+            self.generator.reset()
+            
+        for id in self.resourcePools:
+            self.resourcePools[id].reset()
     
     def start(self, maxIterations = None):
         self.reset()
@@ -95,9 +98,6 @@ class Scenario:
         if self.policy == None:
             print('! No policy defined. Not starting simulation.')
             return
-        #Instantiate policy and generator
-        self.policy = self.policy(self.parameters)
-        self.generator = self.generator(self.jobTemplates, self.customers, randomizer = self.random)
         
         print('Starting simulation (%s)' % (self.policy))
         if maxIterations is None:
@@ -110,7 +110,7 @@ class Scenario:
             print('Step %03d' % (iteration))
             starttime = time.clock()
             if self.generator is not None:
-                self.jobInstances = self.jobInstances.union(self.jobInstances, self.generator.getJobInstances(iteration))
+                self.jobInstances = self.jobInstances.union(self.jobInstances, self.generator.getNewJobInstances(iteration))
             
             prioritizedServiceList = self.policy.getPrioritizedServices(self.jobInstances)
             numServices = len(prioritizedServiceList)
@@ -140,8 +140,11 @@ class Scenario:
                 job.step()
                 if job.wasAborted:
                     abortedJobs += 1
+                    self.sumPenalty += job.template.penalty
                 if job.isFinished:
                     clear.add(job)
+                if job.isFinished and not job.wasAborted:
+                    self.sumRevenue += job.template.revenue
             for job in clear:
                 self.jobInstances.remove(job)
             
@@ -153,6 +156,8 @@ class Scenario:
             self.loadData[iteration]['activeJobs'] = numJobs
             self.loadData[iteration]['activeServices'] = numServices
             self.loadData[iteration]['abortedJobs'] = abortedJobs
+            self.loadData[iteration]['revenue'] = self.sumRevenue
+            self.loadData[iteration]['penalty'] = self.sumPenalty
             self.loadData[iteration]['resources'] = dict()
             for resPool in self.resourcePools:
                 self.loadData[iteration]['resources'][resPool] = dict()
@@ -171,10 +176,10 @@ class Scenario:
             filename = '../reports/%s.out' % (self.policy)
         
         with open(filename, 'w') as reportFile:
-            reportFile.write('#iteration active aborted cpu memory bandwidth\n')
+            reportFile.write('#iteration newjobs activejobs activeservices aborted cpu memory bandwidth revenue penalty\n')
             it = 0
             for iteration in self.loadData:
-                reportFile.write('%d %d %d %d %d %1.4f %1.4f %1.4f\n' 
+                reportFile.write('%d;%d;%d;%d;%d;%1.4f;%1.4f;%1.4f;%.2f;%.2f\n' 
                       % (it,
                          self.generator._getAmountByIteration(it),
                          iteration['activeJobs'],
@@ -182,12 +187,93 @@ class Scenario:
                          iteration['abortedJobs'], 
                          iteration['resources']['ResourcePool01']['CPU'], 
                          iteration['resources']['ResourcePool01']['Memory'], 
-                         iteration['resources']['ResourcePool01']['Bandwidth']
+                         iteration['resources']['ResourcePool01']['Bandwidth'],
+                         iteration['revenue'],
+                         iteration['penalty']
                          ))
                 it += 1
+        
+        
+        activeJobs = list()
+        activeServices = list()
+        generatedJobs = list()
+        abortedJobs = list()
+        resourceCPU = list()
+        resourceMem = list()
+        resourceBwh = list()
+        sumRevenue = list()
+        sumPenalty = list()
+        it = 0
+        for iteration in self.loadData:
+            activeJobs.append(iteration['activeJobs'])
+            activeServices.append(iteration['activeServices'])
+            generatedJobs.append(self.generator._getAmountByIteration(it))
+            abortedJobs.append(iteration['abortedJobs'])
+            resourceCPU.append(iteration['resources']['ResourcePool01']['CPU'])
+            resourceMem.append(iteration['resources']['ResourcePool01']['Memory'])
+            resourceBwh.append(iteration['resources']['ResourcePool01']['Bandwidth'])
+            sumRevenue.append(iteration['revenue'])
+            sumPenalty.append(iteration['penalty'])
+            it += 1
+        
+        fig = plt.figure(figsize = (15, 10))
+        fig.patch.set_facecolor('white')
+        fig.subplots_adjust(top = 0.95, bottom = 0.15, left = 0.05, right = 0.95)
+        plot = fig.add_subplot(1, 1, 1, axisbg = 'w')
+        plot.grid(True)
+        
+        plot2 = plot.twinx()
+        
+        font = {'family': 'serif', 'weight': 'normal', 'size': 11}
+        matplotlib.rc('font', **font)
+        
+        l_generatedJobs = plot.plot(generatedJobs, color = '#20AB00')
+        l_resourceCPU = plot2.plot(resourceCPU, color = '#708090')
+        l_resourceMem = plot2.plot(resourceMem, color = '#6A5ACD')
+        l_resourceBwh = plot2.plot(resourceBwh, color = '#4682B4')
+        l_activeJobs = plot.plot(activeJobs, color = '#0000FF', linewidth = 3)
+        l_activeServices = plot.plot(activeServices, color = '#559BEA', linewidth = 2)
+        l_abortedJobs = plot.plot(abortedJobs, color = '#FF0000', linewidth = 3)
+        
+        plt.xlabel('Ticks')
+        plt.ylabel('Amount')
+        plot2.set_ylabel('Load')
+        legend = fig.legend((l_activeJobs, l_activeServices, l_generatedJobs, l_abortedJobs, l_resourceCPU, l_resourceMem, l_resourceBwh), 
+                            ('Active Jobs', 'Active Services', 'Generated Jobs', 'Aborted Jobs (Sum)', 'CPU Load', 'Memory Load', 'Bandwidth Load'), 
+                            'lower left', ncol = 3)
+        legend.get_frame().set_alpha(0.0)
+        
+        fig.savefig('../reports/%s_load.png' % (self.policy), facecolor = fig.get_facecolor(), edgecolor = 'none')
+        #plt.show()
+        
+        fig = plt.figure(figsize = (15, 10))
+        fig.patch.set_facecolor('white')
+        fig.subplots_adjust(top = 0.95, bottom = 0.15, left = 0.05, right = 0.95)
+        plot = fig.add_subplot(1, 1, 1, axisbg = 'w')
+        plot.grid(True)
+        
+        plot2 = plot.twinx()
+        
+        l_activeJobs = plot.plot(activeJobs, color = '#0000FF', linewidth = 2)
+        l_activeServices = plot.plot(activeServices, color = '#559BEA')
+        l_abortedJobs = plot.plot(abortedJobs, color = '#FF0000', linewidth = 2)
+        l_sumRevenue = plot2.plot(sumRevenue, color = '#22B300', linewidth = 3)
+        l_sumPenalty = plot2.plot(sumPenalty, color = '#B30000', linewidth = 3)
+        
+        plt.xlabel('Ticks')
+        plt.ylabel('Amount')
+        plot2.set_ylabel('Load')
+        legend = fig.legend((l_activeJobs, l_activeServices, l_abortedJobs, l_sumRevenue, l_sumPenalty), 
+                            ('Active Jobs', 'Active Services', 'Aborted Jobs (Sum)', 'Revenue (Sum)', 'Penalty (Sum)'), 
+                            'lower left', ncol = 3)
+        legend.get_frame().set_alpha(0.0)
+        
+        fig.savefig('../reports/%s_revenue.png' % (self.policy), facecolor = fig.get_facecolor(), edgecolor = 'none')
+        #plt.show()
     
     def plot(self):
         fig = plt.figure(figsize = (int(self.generator.nextJobId / 5.0), int(self.numIterations / 5.0)))
+        fig.patch.set_facecolor('white')
         fig.subplots_adjust(top = 0.98, bottom = 0.05, left = 0.05, right = 0.98)
         plot = fig.add_subplot(1, 1, 1)
         

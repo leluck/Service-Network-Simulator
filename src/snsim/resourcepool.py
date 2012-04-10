@@ -31,9 +31,7 @@ class ResourcePool:
     def __init__(self, identifier, resources):
         self.identifier = identifier
         self.resources = resources
-        self.levels = dict()
-        for res in self.resources:
-            self.levels[res] = 0
+        self.reset()
     
     def __str__(self):
         return str(self.identifier)
@@ -70,6 +68,11 @@ class ResourcePool:
             self.levels[identifier] = 0
         else:
             self.levels[identifier] -= amount
+    
+    def reset(self):
+        self.levels = dict()
+        for res in self.resources:
+            self.levels[res] = 0
 
 
 class ResourceCapacityExceededException(Exception):
