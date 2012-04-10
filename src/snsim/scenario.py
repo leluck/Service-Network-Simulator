@@ -50,11 +50,6 @@ class Scenario:
         self.policy = None
         self.generator = None
         
-        if 'Seed' in self.parameters:
-            self.random = random.Random(self.parameters['Seed'])
-        else:
-            self.random = random
-        
         self.reset()
     
     def __str__(self):
@@ -86,8 +81,14 @@ class Scenario:
         self.plotAborts = dict()
         self.jobInstances = set()
         
+        if 'Seed' in self.parameters:
+            self.random = random.Random(self.parameters['Seed'])
+        else:
+            self.random = random
+        
         if self.generator is not None:
             self.generator.reset()
+            self.generator.setRandomObject(self.random)
             
         for id in self.resourcePools:
             self.resourcePools[id].reset()

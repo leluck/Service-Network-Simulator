@@ -46,6 +46,9 @@ class JobGenerator:
     def reset(self):
         self.nextJobId = 0
     
+    def setRandomObject(self, randomizer):
+        self.random = randomizer
+    
     def getNewJobInstances(self, iteration):
         instances = set()
         for id in xrange(0, self._getAmountByIteration(iteration)):
