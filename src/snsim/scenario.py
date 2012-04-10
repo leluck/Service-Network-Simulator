@@ -282,10 +282,18 @@ class Scenario:
         #plt.show()
     
     def plotScheduling(self):
-        fig = plt.figure(dpi = 100, figsize = (5, 3.5))
+        if len(self.plotData) > 25 or self.numIterations > 100:
+            print('! Scheduling plot will be unreadable with high job count or high iteration count.')
+        
+        fig = plt.figure(dpi = 100, figsize = (10, 10))
         fig.patch.set_facecolor('white')
-        fig.subplots_adjust(top = 0.98, bottom = 0.05, left = 0.05, right = 0.98)
+        #fig.subplots_adjust(top = 0.98, bottom = 0.05, left = 0.05, right = 0.98)
         plot = fig.add_subplot(1, 1, 1)
+        
+        font = {'family': 'serif', 'weight': 'normal', 'size': 7}
+        legend = {'fontsize': 7}
+        matplotlib.rc('font', **font)
+        matplotlib.rc('legend', **legend)
         
         vIndex = 0
         yTicks = dict()
