@@ -32,22 +32,31 @@ def launch():
     
     scenario = loader.getScenario()
     scenario.setGenerator(snsim.generator.JobGenerator)
+    it = 600
     
     scenario.setPolicy(snsim.policy.FCFSPolicy)
-    scenario.start(maxIterations = 600)
-    scenario.report()
+    scenario.start(maxIterations = it)
+    scenario.plotLoadAndRevenue()
     
     scenario.setPolicy(snsim.policy.RatioBasedPolicy)
-    scenario.start(maxIterations = 600)
-    scenario.report()
+    scenario.start(maxIterations = it)
+    scenario.plotLoadAndRevenue()
+    
+    scenario.setPolicy(snsim.policy.RevenueBasedPolicy)
+    scenario.start(maxIterations = it)
+    scenario.plotLoadAndRevenue()
     
     scenario.setPolicy(snsim.policy.PenaltyBasedPolicy)
-    scenario.start(maxIterations = 600)
-    scenario.report()
+    scenario.start(maxIterations = it)
+    scenario.plotLoadAndRevenue()
+    
+    scenario.setPolicy(snsim.policy.ClassifiedPenaltyBasedPolicy)
+    scenario.start(maxIterations = it)
+    scenario.plotLoadAndRevenue()
     
     scenario.setPolicy(snsim.policy.FailedAttemptsBasedPolicy)
-    scenario.start(maxIterations = 600)
-    scenario.report()
+    scenario.start(maxIterations = it)
+    scenario.plotLoadAndRevenue()
     
 if __name__ == '__main__':
     launch()

@@ -76,25 +76,25 @@
             <Identifier>Pattern01</Identifier>
             <Signature>(('A'), ('C'), ('B', 'D'))</Signature>
             <Revenue>50</Revenue>
-            <Penalty>80</Penalty>
+            <Penalty>55</Penalty>
         </JobTemplate>
         <JobTemplate>
             <Identifier>Pattern02</Identifier>
             <Signature>(('C'), ('B'))</Signature>
             <Revenue>20</Revenue>
-            <Penalty>30</Penalty>
+            <Penalty>25</Penalty>
         </JobTemplate>
         <JobTemplate>
             <Identifier>Pattern03</Identifier>
             <Signature>(('B', 'C'), ('B'), ('A'))</Signature>
             <Revenue>70</Revenue>
-            <Penalty>150</Penalty>
+            <Penalty>75</Penalty>
         </JobTemplate>
         <JobTemplate>
             <Identifier>Pattern04</Identifier>
             <Signature>(('D', 'A'), ('C'), ('B'), ('A'))</Signature>
             <Revenue>80</Revenue>
-            <Penalty>90</Penalty>
+            <Penalty>85</Penalty>
         </JobTemplate>
         <JobTemplate>
             <Identifier>Pattern05</Identifier>

@@ -40,7 +40,8 @@ class JobGenerator:
         self.reset()
     
     def _getAmountByIteration(self, iteration):
-        return int((math.sin(iteration * 0.05) + 1.0) * 2.5)
+        val = int((math.sin(iteration * 0.05) + 1.0) * 2.5)
+        return val if val > 0 else 0
     
     def reset(self):
         self.nextJobId = 0

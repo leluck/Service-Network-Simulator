@@ -66,7 +66,7 @@ class RatioBasedPolicy:
                         quota.append(float(service.template.resources[resource]) / float(service.template.resourcePool.getCapacity(resource)))
                 priorityKey = float(sum(quota)) / float(len(quota))
                 pending.append((priorityKey, service))
-        for service in sorted(pending, key = lambda service: service[0]):
+        for service in sorted(pending, key = lambda tuple: '%012.2f %04d %s' % (tuple[0], tuple[1].job.identifier, tuple[1]), reverse = True):
             prioritized.append(service[1])
         return prioritized
 
@@ -92,7 +92,7 @@ class RevenueBasedPolicy:
             for service in job.getPendingServices():
                 priorityKey = job.template.revenue + job.getProgress() * job.template.revenue
                 pending.append((priorityKey, service))
-        for service in sorted(pending, key = lambda service: service[0]):
+        for service in sorted(pending, key = lambda tuple: '%012.2f %04d %s' % (tuple[0], tuple[1].job.identifier, tuple[1]), reverse = True):
             prioritized.append(service[1])
         return prioritized
     
@@ -117,7 +117,7 @@ class PenaltyBasedPolicy:
             for service in job.getPendingServices():
                 priorityKey = job.template.revenue + job.template.penalty + job.getProgress() * job.template.revenue + job.getProgress() * job.template.penalty
                 pending.append((priorityKey, service))
-        for service in sorted(pending, key = lambda service: service[0], reverse = True):
+        for service in sorted(pending, key = lambda tuple: '%012.2f %04d %s' % (tuple[0], tuple[1].job.identifier, tuple[1]), reverse = True):
             prioritized.append(service[1])
         return prioritized
 
@@ -147,7 +147,7 @@ class ClassifiedPenaltyBasedPolicy:
                 priorityKey = job.template.revenue + job.template.penalty + job.getProgress() * job.template.revenue + job.getProgress() * job.template.penalty
                 priorityKey *= float(self.parameters['GoldWeight']) ** customerGoldStatus
                 pending.append((priorityKey, service))
-        for service in sorted(pending, key = lambda service: service[0], reverse = True):
+        for service in sorted(pending, key = lambda tuple: '%012.2f %04d %s' % (tuple[0], tuple[1].job.identifier, tuple[1]), reverse = True):
             prioritized.append(service[1])
         return prioritized
 
@@ -176,6 +176,6 @@ class FailedAttemptsBasedPolicy:
                 if service.template.maxAttempts - service.attempts > 0:
                     priorityKey *= 1.0 / float(service.template.maxAttempts - service.attempts)
                 pending.append((priorityKey, service))
-        for service in sorted(pending, key = lambda service: service[0], reverse = True):
+        for service in sorted(pending, key = lambda tuple: '%012.2f %04d %s' % (tuple[0], tuple[1].job.identifier, tuple[1]), reverse = True):
             prioritized.append(service[1])
         return prioritized
