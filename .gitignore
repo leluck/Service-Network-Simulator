@@ -2,7 +2,6 @@
 *.pyc
 
 # Resulting images
-figures/
 *.png
 
 # Resulting output
