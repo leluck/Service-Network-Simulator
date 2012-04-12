@@ -110,7 +110,6 @@ class Scenario:
         absoluteStartTime = time.clock()
         
         while iteration < maxIterations:
-            starttime = time.clock()
             if self.generator is not None:
                 self.jobInstances = self.jobInstances.union(self.jobInstances, self.generator.getNewJobInstances(iteration))
             

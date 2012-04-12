@@ -30,6 +30,8 @@ def launch():
     dataset.
     '''
     
+    filename = '../scenarios/generated.xml'
+        
     cpuMean = 13.30
     memMean = 4600000
     seed = 'abcdefgh'
@@ -65,7 +67,8 @@ def launch():
             for s in range(0, numServices):
                 pattern[i][t].append(rnd.choice(services)[0])
     
-    print('''<?xml version="1.0" encoding="UTF-8"?>
+    with open(filename, 'w') as scenarioFile:
+        scenarioFile.write('''<?xml version="1.0" encoding="UTF-8"?>
 <SNSimScenario>
     <Parameters>
         <Seed>%s</Seed>
@@ -103,10 +106,10 @@ def launch():
             <isGold>True</isGold>
         </Customer>
     </Customers>
-    <Services>''' % (seed, int(cpuMean * 100), int(memMean * 100)))
+    <Services>\n''' % (seed, int(cpuMean * 100), int(memMean * 100)))
     
-    for s in services:
-        print('''        <Service>
+        for s in services:
+            scenarioFile.write('''        <Service>
             <Identifier>%s</Identifier>
             <ResourcePool>ResourcePool01</ResourcePool>
             <Ticks>%d</Ticks>
@@ -116,28 +119,29 @@ def launch():
                 <Bandwidth>0</Bandwidth>
             </Resources>
             <MaxAttempts>100</MaxAttempts>
-        </Service>''' % (s[0], s[1], s[2], s[3]))
-    print('''    </Services>
-    <JobTemplates>''')
-    
-    i = 1
-    for p in pattern:
-        rev = 0.0
-        pen = 0.0
-        for t in p:
-            for s in t:
-                rev += sBids[s]
-                pen += sPens[s]
+        </Service>\n''' % (s[0], s[1], s[2], s[3]))
         
-        print('''        <JobTemplate>
+        scenarioFile.write('''    </Services>
+    <JobTemplates>\n''')
+    
+        i = 1
+        for p in pattern:
+            rev = 0.0
+            pen = 0.0
+            for t in p:
+                for s in t:
+                    rev += sBids[s]
+                    pen += sPens[s]
+            
+            scenarioFile.write('''        <JobTemplate>
             <Identifier>Pattern%02d</Identifier>
             <Signature>%s</Signature>
             <Revenue>%.2f</Revenue>
             <Penalty>%.2f</Penalty>
-        </JobTemplate>''' % (i, str(p).replace('[', '(').replace(']', ')'), rev, pen))
-        i += 1
+        </JobTemplate>\n''' % (i, str(p).replace('[', '(').replace(']', ')'), rev, pen))
+            i += 1
     
-    print('''    </JobTemplates>
+        scenarioFile.write('''    </JobTemplates>
 </SNSimScenario>''')
     
 if __name__ == '__main__':
