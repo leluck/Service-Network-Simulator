@@ -110,7 +110,6 @@ class Scenario:
         absoluteStartTime = time.clock()
         
         while iteration < maxIterations:
-            print('Step %03d' % (iteration))
             starttime = time.clock()
             if self.generator is not None:
                 self.jobInstances = self.jobInstances.union(self.jobInstances, self.generator.getNewJobInstances(iteration))
@@ -151,8 +150,7 @@ class Scenario:
             for job in clear:
                 self.jobInstances.remove(job)
             
-            elapsed = time.clock() - starttime
-            print('%.4f sec for %5d active services' % (elapsed, numServices))
+            #print('Step %03d (%.4fs elapsed)' % (iteration, time.clock() - starttime))
             
             # Collect system load information
             self.loadData.append(dict())
@@ -172,7 +170,7 @@ class Scenario:
             
         # End of main while loop
         self.numIterations = iteration
-        print('Simulation finished after %d iterations taking %.2f seconds.' % (self.numIterations, time.clock() - absoluteStartTime))
+        print('Simulation finished after %d iterations (%.4fs elapsed).' % (self.numIterations, time.clock() - absoluteStartTime))
     
     def saveCSVReport(self):
         filename = '../reports/%s.out' % (self.policy)
@@ -223,14 +221,14 @@ class Scenario:
             trace['accPenalties'].append(iteration['penalty'])
             trace['accRevenue'].append(iteration['biddings'] - iteration['penalty'])
         
-        font = {'family': 'serif', 'weight': 'normal', 'size': 7}
-        legend = {'fontsize': 7}
+        font = {'family': 'serif', 'weight': 'normal', 'size': 8}
+        legend = {'fontsize': 8}
         matplotlib.rc('font', **font)
         matplotlib.rc('legend', **legend)
         
-        fig = plt.figure(dpi = 100, figsize = (5, 3.5))
+        fig = plt.figure(figsize = (5, 3.5), dpi = 100)
         fig.patch.set_facecolor('white')
-        fig.subplots_adjust(bottom = 0.15)
+        fig.subplots_adjust(bottom = 0.2, right = 0.85)
         plot = fig.add_subplot(1, 1, 1, axisbg = 'w')
         plot.grid(True)
         plot2 = plot.twinx()
@@ -238,26 +236,25 @@ class Scenario:
         l_generatedJobs = plot.plot(trace['generatedJobs'], color = '#20AB00')
         l_resourceCPU = plot2.plot(trace['resourceCPU'], color = '#708090', linewidth = 0.5)
         l_resourceMem = plot2.plot(trace['resourceMem'], color = '#6A5ACD', linewidth = 0.5)
-        l_resourceBwh = plot2.plot(trace['resourceBwh'], color = '#4682B4', linewidth = 0.5)
+        #l_resourceBwh = plot2.plot(trace['resourceBwh'], color = '#4682B4', linewidth = 0.5)
         l_activeJobs = plot.plot(trace['activeJobs'], color = '#0000FF')
         l_activeServices = plot.plot(trace['activeServices'], color = '#559BEA')
         l_abortedJobs = plot.plot(trace['abortedJobs'], color = '#FF0000')
         
-        plt.xlabel('Ticks')
-        plt.ylabel('Amount')
-        plot.set_ylabel('Count')
-        plot2.set_ylabel('Load')
-        legend = fig.legend((l_activeJobs, l_activeServices, l_generatedJobs, l_abortedJobs, l_resourceCPU, l_resourceMem, l_resourceBwh), 
-                            ('Active Jobs', 'Active Services', 'Generated Jobs', 'Aborted Jobs (acc.)', 'CPU Load', 'Memory Load', 'Bandwidth Load'), 
-                            'lower left', ncol = 4)
+        plot.set_xlabel('Time Slots')
+        plot.set_ylabel('Job/Service Count')
+        plot2.set_ylabel('Load Ratio')
+        legend = fig.legend((l_activeJobs, l_activeServices, l_generatedJobs, l_abortedJobs, l_resourceCPU, l_resourceMem), 
+                            ('Active Jobs', 'Active Services', 'Generated Jobs', 'Aborted Jobs (acc.)', 'CPU Load', 'Memory Load'), 
+                            'lower left', ncol = 3)
         legend.get_frame().set_alpha(0.0)
         
         fig.savefig('../figures/%s_load.png' % (self.policy), facecolor = fig.get_facecolor(), edgecolor = 'none')
         #plt.show()
         
-        fig = plt.figure(dpi = 100, figsize = (5, 3.5))
+        fig = plt.figure(figsize = (5, 3.5), dpi = 100)
         fig.patch.set_facecolor('white')
-        fig.subplots_adjust(bottom = 0.15)
+        fig.subplots_adjust(bottom = 0.2, right = 0.85)
         plot = fig.add_subplot(1, 1, 1, axisbg = 'w')
         plot.grid(True)
         plot2 = plot.twinx()
@@ -269,13 +266,12 @@ class Scenario:
         l_accPenalties = plot2.plot(trace['accPenalties'], color = '#B30000')
         l_accRevenue = plot2.plot(trace['accRevenue'], color = '#FFC000', linewidth = 2)
         
-        plt.xlabel('Ticks')
-        plt.ylabel('Amount')
-        plot.set_ylabel('Count')
+        plot.set_xlabel('Time Slots')
+        plot.set_ylabel('Job/Service Count')
         plot2.set_ylabel('Value')
         legend = fig.legend((l_activeJobs, l_activeServices, l_abortedJobs, l_accBiddings, l_accPenalties, l_accRevenue), 
-                            ('Active Jobs', 'Active Services', 'Aborted Jobs (acc.)', 'Biddings (acc.)', 'Penalty (acc.)', 'Revenue - Penalty'), 
-                            'lower left', ncol = 4)
+                            ('Active Jobs', 'Active Services', 'Aborted Jobs (acc.)', 'Bids (acc.)', 'Penalty (acc.)', 'Bids - Penalty'), 
+                            'lower left', ncol = 3)
         legend.get_frame().set_alpha(0.0)
         
         fig.savefig('../figures/%s_revenue.png' % (self.policy), facecolor = fig.get_facecolor(), edgecolor = 'none')

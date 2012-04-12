@@ -28,11 +28,11 @@ import snsim.policy
 import snsim.generator
 
 def launch():
-    loader = snsim.xmlloader.XMLScenarioLoader('../scenarios/scenario_02.xml')
+    loader = snsim.xmlloader.XMLScenarioLoader('../scenarios/scenario_03.xml')
     
     scenario = loader.getScenario()
     scenario.setGenerator(snsim.generator.JobGenerator)
-    it = 600
+    it = 500
     
     scenario.setPolicy(snsim.policy.FCFSPolicy)
     scenario.start(maxIterations = it)
