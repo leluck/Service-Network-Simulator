@@ -34,8 +34,9 @@ class Scenario:
     '''Defines a whole scenario for the service network simulation.
     Given a set of resource pools, service templates, job templates
     and customers, a scenario is able to generate a set of job
-    instances. If a policy is set, the scenario is used to run
-    and control the complete simulation.
+    instances or apply a job generator to continuously generate jobs. 
+    If a policy is set, the scenario is used to run and control the 
+    complete simulation.
     Scenarios can be reset in order to re-run a simulation based
     on the same set of job instances with another policy set.
     '''
@@ -49,6 +50,7 @@ class Scenario:
         
         self.policy = None
         self.generator = None
+        self.bouncer = None
         
         self.reset()
     
@@ -64,6 +66,9 @@ class Scenario:
     
     def setGenerator(self, generator):
         self.generator = generator(self.jobTemplates, self.customers, randomizer = self.random)
+        
+    def setBouncer(self, bouncer):
+        self.bouncer = bouncer()
     
     def generateInitialJobs(self, count):
         self.jobInstances = set()
@@ -77,7 +82,7 @@ class Scenario:
         self.sumBiddings = 0.0
         self.sumPenalty = 0.0
         self.loadData = list()
-        self.plotData = dict()
+        self.scheduleData = dict()
         self.plotAborts = dict()
         self.jobInstances = set()
         
@@ -107,11 +112,18 @@ class Scenario:
             maxIterations = 200
         iteration = 0
         abortedJobs = 0
+        declinedJobs = 0
         absoluteStartTime = time.clock()
         
         while iteration < maxIterations:
             if self.generator is not None:
-                self.jobInstances = self.jobInstances.union(self.jobInstances, self.generator.getNewJobInstances(iteration))
+                newJobs = self.generator.getNewJobInstances(iteration)
+                if self.bouncer:
+                    accept, decline = self.bouncer.filterJobs(newJobs, self.loadData)
+                    declinedJobs += len(decline)
+                    self.jobInstances = self.jobInstances.union(self.jobInstances, accept)
+                else:
+                    self.jobInstances = self.jobInstances.union(self.jobInstances, newJobs)
             
             prioritizedServiceList = self.policy.getPrioritizedServices(self.jobInstances)
             numServices = len(prioritizedServiceList)
@@ -119,14 +131,14 @@ class Scenario:
             for service in prioritizedServiceList:
                 jobIndex = '%03d' % (service.job.identifier)
                 serviceIndex = '(%s,%s)' % (service.job.currentTuple, service.template.identifier)
-                if jobIndex not in self.plotData:
-                    self.plotData[jobIndex] = dict()
-                if serviceIndex not in self.plotData[jobIndex]:
-                    self.plotData[jobIndex][serviceIndex] = list()
+                if jobIndex not in self.scheduleData:
+                    self.scheduleData[jobIndex] = dict()
+                if serviceIndex not in self.scheduleData[jobIndex]:
+                    self.scheduleData[jobIndex][serviceIndex] = list()
                 
                 try:
                     service.job.startService(service) # Weird, but service must not start itself!
-                    self.plotData[jobIndex][serviceIndex].append((iteration, service.template.ticks))
+                    self.scheduleData[jobIndex][serviceIndex].append((iteration, service.template.ticks))
                 except snsim.resourcepool.ResourceCapacityExceededException:
                     pass
                 except snsim.service.MaxAttemptsReachedException:
@@ -156,6 +168,7 @@ class Scenario:
             self.loadData[iteration]['activeJobs'] = numJobs
             self.loadData[iteration]['activeServices'] = numServices
             self.loadData[iteration]['abortedJobs'] = abortedJobs
+            self.loadData[iteration]['declinedJobs'] = declinedJobs
             self.loadData[iteration]['biddings'] = self.sumBiddings
             self.loadData[iteration]['penalty'] = self.sumPenalty
             self.loadData[iteration]['resources'] = dict()
@@ -183,7 +196,8 @@ class Scenario:
                          self.generator._getAmountByIteration(it),
                          iteration['activeJobs'],
                          iteration['activeServices'],
-                         iteration['abortedJobs'], 
+                         iteration['abortedJobs'],
+                         iteration['declinedJobs'],
                          iteration['resources']['ResourcePool01']['CPU'], 
                          iteration['resources']['ResourcePool01']['Memory'], 
                          iteration['resources']['ResourcePool01']['Bandwidth'],
@@ -198,6 +212,7 @@ class Scenario:
         trace['activeServices'] = []
         trace['generatedJobs'] = []
         trace['abortedJobs'] = []
+        trace['declinedJobs'] = []
         trace['resourceCPU'] = []
         trace['resourceMem'] = []
         trace['resourceBwh'] = []
@@ -213,6 +228,7 @@ class Scenario:
             else:
                 trace['generatedJobs'].append(0)
             trace['abortedJobs'].append(iteration['abortedJobs'])
+            trace['declinedJobs'].append(iteration['declinedJobs'])
             trace['resourceCPU'].append(iteration['resources']['ResourcePool01']['CPU'])
             trace['resourceMem'].append(iteration['resources']['ResourcePool01']['Memory'])
             trace['resourceBwh'].append(iteration['resources']['ResourcePool01']['Bandwidth'])
@@ -232,19 +248,20 @@ class Scenario:
         plot.grid(True)
         plot2 = plot.twinx()
         
-        l_generatedJobs = plot.plot(trace['generatedJobs'], color = '#20AB00')
+        #l_generatedJobs = plot.plot(trace['generatedJobs'], color = '#20AB00')
         l_resourceCPU = plot2.plot(trace['resourceCPU'], color = '#708090', linewidth = 0.5)
         l_resourceMem = plot2.plot(trace['resourceMem'], color = '#6A5ACD', linewidth = 0.5)
         #l_resourceBwh = plot2.plot(trace['resourceBwh'], color = '#4682B4', linewidth = 0.5)
         l_activeJobs = plot.plot(trace['activeJobs'], color = '#0000FF')
         l_activeServices = plot.plot(trace['activeServices'], color = '#559BEA')
         l_abortedJobs = plot.plot(trace['abortedJobs'], color = '#FF0000')
+        l_declinedJobs = plot.plot(trace['declinedJobs'], color = '#FFAE00')
         
         plot.set_xlabel('Time Slots')
         plot.set_ylabel('Job/Service Count')
         plot2.set_ylabel('Load Ratio')
-        legend = fig.legend((l_activeJobs, l_activeServices, l_generatedJobs, l_abortedJobs, l_resourceCPU, l_resourceMem), 
-                            ('Active Jobs', 'Active Services', 'Generated Jobs', 'Aborted Jobs (acc.)', 'CPU Load', 'Memory Load'), 
+        legend = fig.legend((l_activeJobs, l_activeServices, l_declinedJobs, l_abortedJobs, l_resourceCPU, l_resourceMem), 
+                            ('Active Jobs', 'Active Services', 'Aborted Jobs (acc.)', 'Declined Jobs (acc.)', 'CPU Load', 'Memory Load'), 
                             'lower left', ncol = 3)
         legend.get_frame().set_alpha(0.0)
         
@@ -277,7 +294,7 @@ class Scenario:
         #plt.show()
     
     def plotScheduling(self):
-        if len(self.plotData) > 25 or self.numIterations > 100:
+        if len(self.scheduleData) > 25 or self.numIterations > 100:
             print('! Scheduling plot will be unreadable with high job count or high iteration count.')
         
         fig = plt.figure(dpi = 100, figsize = (10, 10))
@@ -294,26 +311,26 @@ class Scenario:
         yTicks = dict()
         
         currentJob = 0
-        for job in sorted(self.plotData.keys(), reverse=True):
+        for job in sorted(self.scheduleData.keys(), reverse=True):
             currentJob += 1
             
             if currentJob % 2 == 1:
                 # Draw gray shaded background for every second job
-                rect = plp.Rectangle((0, vIndex + 0.5), self.numIterations, len(self.plotData[job]), facecolor = 'gray', edgecolor = 'none', alpha = 0.2, fill = True)
+                rect = plp.Rectangle((0, vIndex + 0.5), self.numIterations, len(self.scheduleData[job]), facecolor = 'gray', edgecolor = 'none', alpha = 0.2, fill = True)
                 plt.gca().add_patch(rect)
             
             if job in self.plotAborts:
                 # Draw red block whenever a job was aborted
-                rect = plp.Rectangle((self.plotAborts[job], vIndex + 0.5), 1, len(self.plotData[job]), facecolor = 'red', edgecolor = 'none', alpha = 1.0, fill = True)
+                rect = plp.Rectangle((self.plotAborts[job], vIndex + 0.5), 1, len(self.scheduleData[job]), facecolor = 'red', edgecolor = 'none', alpha = 1.0, fill = True)
                 plt.gca().add_patch(rect)
             
-            for service in sorted(self.plotData[job].keys(), reverse=True):
+            for service in sorted(self.scheduleData[job].keys(), reverse=True):
                 # Draw service scheduling bars
                 vIndex += 1
                 yTicks[job + ', ' + service] = vIndex
                 
-                jobColor = plt.get_cmap('jet')(float(currentJob)/len(self.plotData))
-                plot.broken_barh(self.plotData[job][service], (vIndex - 0.25, 0.5), facecolors = jobColor)
+                jobColor = plt.get_cmap('jet')(float(currentJob)/len(self.scheduleData))
+                plot.broken_barh(self.scheduleData[job][service], (vIndex - 0.25, 0.5), facecolors = jobColor)
         
         plot.set_ylim(0, vIndex + 1)
         plot.set_yticks(yTicks.values())

@@ -26,37 +26,35 @@
 import snsim.xmlloader
 import snsim.policy
 import snsim.generator
+import snsim.bouncer
 
 def launch():
     loader = snsim.xmlloader.XMLScenarioLoader('../scenarios/scenario_03.xml')
     
     scenario = loader.getScenario()
     scenario.setGenerator(snsim.generator.JobGenerator)
+    scenario.setBouncer(snsim.bouncer.Bouncer)
     it = 500
     
     scenario.setPolicy(snsim.policy.FCFSPolicy)
     scenario.start(maxIterations = it)
     scenario.plotLoadAndRevenue()
     
-    scenario.setPolicy(snsim.policy.RatioBasedPolicy)
-    scenario.start(maxIterations = it)
-    scenario.plotLoadAndRevenue()
+    #scenario.setPolicy(snsim.policy.RatioBasedPolicy)
+    #scenario.start(maxIterations = it)
+    #scenario.plotLoadAndRevenue()
     
-    scenario.setPolicy(snsim.policy.RevenueBasedPolicy)
-    scenario.start(maxIterations = it)
-    scenario.plotLoadAndRevenue()
+    #scenario.setPolicy(snsim.policy.RevenueBasedPolicy)
+    #scenario.start(maxIterations = it)
+    #scenario.plotLoadAndRevenue()
     
-    scenario.setPolicy(snsim.policy.PenaltyBasedPolicy)
-    scenario.start(maxIterations = it)
-    scenario.plotLoadAndRevenue()
+    #scenario.setPolicy(snsim.policy.PenaltyBasedPolicy)
+    #scenario.start(maxIterations = it)
+    #scenario.plotLoadAndRevenue()
     
-    scenario.setPolicy(snsim.policy.ClassifiedPenaltyBasedPolicy)
-    scenario.start(maxIterations = it)
-    scenario.plotLoadAndRevenue()
-    
-    scenario.setPolicy(snsim.policy.FailedAttemptsBasedPolicy)
-    scenario.start(maxIterations = it)
-    scenario.plotLoadAndRevenue()
+    #scenario.setPolicy(snsim.policy.ClassifiedPenaltyBasedPolicy)
+    #scenario.start(maxIterations = it)
+    #scenario.plotLoadAndRevenue()
     
 if __name__ == '__main__':
     launch()
