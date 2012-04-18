@@ -91,10 +91,13 @@ class Scenario:
         else:
             self.random = random
         
-        if self.generator is not None:
+        if self.generator:
             self.generator.reset()
             self.generator.setRandomObject(self.random)
-            
+        
+        if self.bouncer:
+            self.bouncer.reset()
+        
         for id in self.resourcePools:
             self.resourcePools[id].reset()
     
@@ -184,7 +187,7 @@ class Scenario:
         self.numIterations = iteration
         print('Simulation finished after %d iterations (%.4fs elapsed).' % (self.numIterations, time.clock() - absoluteStartTime))
     
-    def saveCSVReport(self):
+    def exportCSV(self):
         filename = '../reports/%s.out' % (self.policy)
         
         with open(filename, 'w') as reportFile:
@@ -260,7 +263,7 @@ class Scenario:
         plot.set_xlabel('Time Slots')
         plot.set_ylabel('Job/Service Count')
         plot2.set_ylabel('Load Ratio')
-        legend = fig.legend((l_activeJobs, l_activeServices, l_declinedJobs, l_abortedJobs, l_resourceCPU, l_resourceMem), 
+        legend = fig.legend((l_activeJobs, l_activeServices, l_abortedJobs, l_declinedJobs, l_resourceCPU, l_resourceMem), 
                             ('Active Jobs', 'Active Services', 'Aborted Jobs (acc.)', 'Declined Jobs (acc.)', 'CPU Load', 'Memory Load'), 
                             'lower left', ncol = 3)
         legend.get_frame().set_alpha(0.0)

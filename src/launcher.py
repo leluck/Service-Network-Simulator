@@ -36,9 +36,10 @@ def launch():
     scenario.setBouncer(snsim.bouncer.Bouncer)
     it = 500
     
-    scenario.setPolicy(snsim.policy.FCFSPolicy)
+    scenario.setPolicy(snsim.policy.PenaltyBasedPolicy)
     scenario.start(maxIterations = it)
     scenario.plotLoadAndRevenue()
+    scenario.bouncer.exportTrace('../reports/trace.out')
     
     #scenario.setPolicy(snsim.policy.RatioBasedPolicy)
     #scenario.start(maxIterations = it)
