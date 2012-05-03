@@ -222,6 +222,7 @@ class Scenario:
         trace['accBiddings'] = []
         trace['accPenalties'] = []
         trace['accRevenue'] = []
+        trace['resourceAvg'] = []
         
         for iteration in self.loadData:
             trace['activeJobs'].append(iteration['activeJobs'])
@@ -238,14 +239,15 @@ class Scenario:
             trace['accBiddings'].append(iteration['biddings'])
             trace['accPenalties'].append(iteration['penalty'])
             trace['accRevenue'].append(iteration['biddings'] - iteration['penalty'])
+            trace['resourceAvg'].append((iteration['resources']['ResourcePool01']['CPU'] + iteration['resources']['ResourcePool01']['Memory']) / 2.0)
         
         with open(filename, 'w') as outfile:
             outfile.write('#it actjobs actserv genjobs abrtjobs decljobs rescpu resmem bids pentys revenue\n')
             for i in range(len(trace['activeJobs'])):
-                outfile.write('%d %d %d %d %d %d %.2f %.2f %.2f %.2f %.2f\n' % \
+                outfile.write('%d %d %d %d %d %d %.2f %.2f %.2f %.2f %.2f %.2f\n' % \
                               (i, trace['activeJobs'][i], trace['activeServices'][i], trace['generatedJobs'][i], \
                                trace['abortedJobs'][i], trace['declinedJobs'][i], trace['resourceCPU'][i], trace['resourceMem'][i], \
-                               trace['accBiddings'][i], trace['accPenalties'][i], trace['accRevenue'][i]))
+                               trace['accBiddings'][i], trace['accPenalties'][i], trace['accRevenue'][i], trace['resourceAvg'][i]))
             print('File \'%s\' written.' % (filename))
     
     def plotGraphs(self):
