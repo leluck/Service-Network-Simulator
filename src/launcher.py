@@ -34,28 +34,18 @@ def launch():
     scenario = loader.getScenario()
     scenario.setGenerator(snsim.generator.JobGenerator)
     scenario.setBouncer(snsim.bouncer.Bouncer)
-    it = 500
+    it = 5000
     
     scenario.setPolicy(snsim.policy.PenaltyBasedPolicy)
+    scenario.bouncer.debugSetAcceptAll(True)
     scenario.start(maxIterations = it)
-    scenario.plotLoadAndRevenue()
-    scenario.bouncer.exportTrace('../reports/trace.out')
+    scenario.bouncer.exportTrace('../reports/trace_bouncer_inactive.out')
+    scenario.exportTrace('../reports/trace_scenario_inactive.out')
     
-    #scenario.setPolicy(snsim.policy.RatioBasedPolicy)
-    #scenario.start(maxIterations = it)
-    #scenario.plotLoadAndRevenue()
-    
-    #scenario.setPolicy(snsim.policy.RevenueBasedPolicy)
-    #scenario.start(maxIterations = it)
-    #scenario.plotLoadAndRevenue()
-    
-    #scenario.setPolicy(snsim.policy.PenaltyBasedPolicy)
-    #scenario.start(maxIterations = it)
-    #scenario.plotLoadAndRevenue()
-    
-    #scenario.setPolicy(snsim.policy.ClassifiedPenaltyBasedPolicy)
-    #scenario.start(maxIterations = it)
-    #scenario.plotLoadAndRevenue()
+    scenario.bouncer.debugSetAcceptAll(False)
+    scenario.start(maxIterations = it)
+    scenario.bouncer.exportTrace('../reports/trace_bouncer_active.out')
+    scenario.exportTrace('../reports/trace_scenario_active.out')
     
 if __name__ == '__main__':
     launch()
